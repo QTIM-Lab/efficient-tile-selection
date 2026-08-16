@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+.ipynb_checkpoints/
+
+# Nothing produced by a run belongs in the repo: outputs go under paths.data_root.
+*.pt
+*.h5
+*.png
+*.pdf
+*.csv
+slurm-*.out

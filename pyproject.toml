@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tileselect"
+version = "1.0.0"
+description = "Thumbnail-based tile selection for efficient whole-slide image classification with attention-MIL."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Dagoberto Pulido Arias", email = "dpulido@mgh.harvard.edu" },
+    { name = "Mason Cleveland" },
+    { name = "Diana Mindroc-Filimon" },
+    { name = "Albert Kim" },
+    { name = "Christopher P. Bridge" },
+]
+keywords = ["computational-pathology", "whole-slide-imaging", "multiple-instance-learning", "tile-selection"]
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+dependencies = [
+    "einops>=0.8.2",
+    "einops-exts>=0.0.4",
+    "future>=1.0.0",
+    "h5py>=3.15.1",
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.1",
+    "openslide-python>=1.4.3",
+    "openslide-bin",
+    "pandas>=3.0.0",
+    "pillow>=12.1.0",
+    "plotly>=6.7.0",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.8.0",
+    "scipy>=1.17.0",
+    "timm>=1.0.24",
+    "torch>=2.10.0",
+    "torchvision>=0.25.0",
+    "tqdm>=4.67.1",
+]
+
+[project.urls]
+Repository = "https://github.com/QTIM-Lab/efficent-tile-selection"
+
+[project.scripts]
+tileselect = "tileselect.cli:main"
+tileselect-eval = "tileselect.eval.degradation:main"
+tileselect-plot = "tileselect.eval.plot:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tileselect"]

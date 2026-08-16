@@ -1,0 +1,107 @@
+# Configuration template. Copy it, fill in the paths for your own cohort, and pass it
+# with --config. Every value below is left blank on purpose: the repository ships no
+# data, no label files and no site paths.
+#
+# Only `paths.data_root`, `data.dataset_dir`, `data.csv_path` and a CLAM checkpoint
+# are needed to run the degradation evaluation. The rest have working defaults.
+
+paths:
+  # Everything this tool writes -- checkpoints, generated U-Net targets, eval results,
+  # figures -- goes under this root. Nothing is ever written inside the repository.
+  # Can also be supplied as the TILESELECT_DATA_ROOT environment variable.
+  data_root:
+
+data:
+  # One .h5 per slide, holding:
+  #   features [N, D]  tile embeddings from your encoder
+  #   coords   [N, 2]  level-0 pixel coordinates, with a patch_size_level0 attribute
+  dataset_dir:
+  # Slide-level labels. Required columns: slide_id, label.
+  # Optional: features_path (overrides dataset_dir per slide) and domain (a cohort
+  # tag, so one CSV can hold several cohorts; select one with --domain).
+  csv_path:
+  labels_csv:
+  h5_key: features
+
+  # Whole-slide images. Read only to pull thumbnails, and to profile per-tile I/O.
+  # Optional if you already have thumbnails on disk.
+  svs_dir:
+  thumbnail_dir:
+  patches_dir:
+
+  # Written by --create_splits, read by everything downstream.
+  split_dir:
+  train_split:
+  val_split:
+  test_split:
+  split_ratios: [0.7, 0.15, 0.15]
+
+  # Where --generate_unet_data writes the selector's training targets.
+  unet_data_dir:
+  # Space those targets live in: `softmax` is the distribution CLAM actually pools
+  # with; `sigmoid` squashes per tile, independently of bag size. Both are monotone
+  # in the raw attention, so the tile ORDER is identical either way -- they differ
+  # only in the shape of the target. Must match how unet_data_dir was generated.
+  attn_transform: softmax
+
+  thumb_size: 224        # U-Net input resolution
+  unet_grid_size:        # U-Net output grid; defaults to thumb_size
+
+experiment:
+  # Set exactly one when you have per-fold splits and checkpoints named
+  # splits_{fold}.csv and s_{fold}_checkpoint.pt inside checkpoint_dir.
+  # With neither, a single train/val/test split is used.
+  use_folds: false
+  use_cv: false
+  checkpoint_dir:
+  output_dir:
+  seed: 42
+  verbose: true
+
+model:
+  # Tile embedding width: 768 for CONCH v1.5, 512 for CONCH v1, etc.
+  feature_dim:
+  n_classes:
+  dropout: 0.25
+  # Trained CLAM checkpoint. This tool does not require training one: it consumes an
+  # existing classifier and never updates it.
+  clam_pretrained_path:
+  # Trained thumbnail selector, written by --train_unet.
+  unet_path:
+  # Encoder weights, only needed by --extract_thumbs.
+  conch_weights:
+
+  # CLAM settings. Relevant only if you retrain with --train_clam; they should mirror
+  # how your checkpoint was originally trained, or the retrain will not reproduce it.
+  # inst_loss `ce` uses nn.CrossEntropyLoss; `svm` uses the vendored SmoothTop1SVM.
+  # bag_weight < 1 means the instance-level clustering loss shaped attention_net too,
+  # which matters here because attention_net is what the selector is distilled from.
+  bag_loss: ce
+  inst_loss: ce
+  bag_weight: 0.7
+  subtyping: false
+
+training:
+  epochs: 20
+  batch_size: 32
+  lr: 0.001
+  patience: 10
+  device: cuda
+  # Selector training. `loss` is the objective against the attention target;
+  # `reg` its weight; `blur_sigma` smooths the target; `augment` enables flips.
+  loss: mse
+  reg: 0.0
+  blur_sigma: 0.0
+  augment: false
+
+eval:
+  # Resampling trials for the stochastic strategies (weighted sampling). The
+  # deterministic top-k strategies ignore this: repeating them changes nothing.
+  n_resample: 10
+  # `pct` sweeps fractions of each slide's tiles; `k` sweeps absolute tile counts,
+  # which is the fairer axis when slides differ a lot in size.
+  budget_mode: pct
+  budgets:
+  # How the U-Net heatmap becomes sampling log-weights: `softmax` uses the selector's
+  # own distribution; `log` takes the log of the squashed scores.
+  score_transform: softmax
