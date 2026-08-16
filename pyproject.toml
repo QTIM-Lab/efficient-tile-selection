@@ -44,7 +44,7 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/QTIM-Lab/efficent-tile-selection"
+Repository = "https://github.com/QTIM-Lab/efficient-tile-selection"
 
 [project.scripts]
 tileselect = "tileselect.cli:main"
